@@ -6,7 +6,6 @@ import tensorflow as tf
 from tensorflow.python.ops import seq2seq
 from model import EncDecModel
 import data_loader as data_loader
-import data_utils
 
 def main():
     p = argparse.ArgumentParser()
@@ -35,7 +34,6 @@ def train(args):
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
-        proc = subprocess.Popen(["tensorboard","--logdir="+address])
 
         for i in range(args.epoches):
             batch_x = source[i+0 : i+args.batch_size * args.time_steps * args.input_size]
@@ -43,11 +41,9 @@ def train(args):
             batch_y = np.zeros((len(charlist), args.output_classes))
             for j in range(len(charlist)-1):
                 batch_y[j][int(charlist[j])] = 1.0
-            print("batch_x shape:", batch_x.shape, "batch_y shape", batch_y.shape)
             # Reshape batch to input size
             batch_x = batch_x.reshape((args.batch_size, args.time_steps, args.input_size))
 
-            print("batch_x shape:", batch_x.shape, "batch_y shape", batch_y.shape)
             feed = {model.X: batch_x, model.Y: batch_y}
             sess.run(model.optimizer, feed_dict=feed)
             if i % args.display_step == 0:
@@ -57,8 +53,6 @@ def train(args):
             if i % 100 == 0 and not(i==0):
                 seq = ''
                 x_inp = batch_x
-                print("batchx shape: ", batch_x.shape)
-                print("batchy shape: ", batch_y.shape)
                 for j in range(140):
                     index = model.hypothesis_index.eval({
                         model.X: x_inp,
@@ -69,10 +63,10 @@ def train(args):
                     x_inp[-1] = float(ord(next_letter))
                     x_inp = x_inp.reshape((args.batch_size,args.time_steps,args.input_size))
                     seq += next_letter
-                f = open('save/gen' + str(i) + '.txt', 'w+')
-                print "save:\n" +seq
-                f.write(seq)
-                f.close()
+                with open('save/gen' + str(i) + '.txt', 'w+') as f:
+                    print "save:\n" +seq
+                    f.write(seq)
+                    f.close()
             if i % 1000 == 0 and not(i == 0):
                 saver.save(sess,"save/" +str(i) +".ckpt")
 
@@ -83,7 +77,6 @@ def train(args):
         test_accuracy = sess.run(model.accuracy, feed_dict=feed)
         print ("Final test accuracy: %g" %(test_accuracy))
         saver.save(sess,"save/model.ckpt")
-        proc.kill()
 
 if __name__ == "__main__":
     main()

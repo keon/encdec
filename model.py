@@ -1,5 +1,4 @@
 import tensorflow as tf
-import data_utils
 from tensorflow.python.ops import rnn
 from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops import seq2seq
