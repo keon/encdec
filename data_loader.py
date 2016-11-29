@@ -4,6 +4,7 @@ import collections
 import os
 
 def get_data(end=100, data_dir=""):
+    # TODO target loader
     # source_path = os.path.join(data_dir, "source.txt")
     # target_path = os.path.join(data_dir, "label.txt")
     # print(source_path, target_path)
